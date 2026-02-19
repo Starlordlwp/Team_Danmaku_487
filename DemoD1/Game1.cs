@@ -18,11 +18,18 @@ namespace DemoD1
         private float _normalSpeed = 300f;
         private float _slowSpeed = 120f;
         private bool _isSlowMode = false;
+        private bool _midBossSpawned = false;
+        private bool _midBossDefeated = false;
+        private bool _finalBossSpawned = false;
 
+        private double _midBossTimer = 0;
         private double _gameTimer = 0;
         private List<Vector2> _enemies = new();
         private List<Vector2> _bosses = new();
         private Random _rng = new();
+
+        private List<Vector2> _enemyBullets = new();
+        private double _enemyShootTimer = 0;
 
         public Game1()
         {
@@ -95,15 +102,51 @@ namespace DemoD1
 
         private void HandleSpawningLogic(float dt)
         {
+        
+            for (int i = 0; i < _enemyBullets.Count; i++)
+            {
+            _enemyBullets[i] = new Vector2(
+            _enemyBullets[i].X,
+            _enemyBullets[i].Y + 250f * dt);
+
+            if (_enemyBullets[i].Y > 600)
+                {
+             _enemyBullets.RemoveAt(i);
+            i--;
+                }
+            }
+            _enemyShootTimer += dt;
+
+            if (_enemyShootTimer > 1.5f)
+            {
+             _enemyShootTimer = 0;
+
+             foreach (var e in _enemies)
+                {
+                // 5 bullet fan spread
+                for (int i = -2; i <= 2; i++)
+                {
+                 Vector2 bulletPos = new Vector2(e.X + 12 + (i * 5), e.Y + 25);
+                _enemyBullets.Add(bulletPos);
+                }
+                }       
+            }
+
             // Spawn regular enemies every 2s for first 48s
             if (_gameTimer < 48 && _gameTimer % 2 < dt)
             {
                 _enemies.Add(new Vector2(_rng.Next(0, 775), -30));
             }
             // Spawn mid-boss once at 48s
-            else if (_gameTimer >= 48 && _gameTimer < 48 + dt)
+            else if (_gameTimer >= 48 && !_midBossSpawned)
             {
                 _bosses.Add(new Vector2(360, -100));
+                _midBossSpawned = true;
+            }
+            else if (_midBossSpawned && !_finalBossSpawned && _midBossTimer > 15)
+            {
+                _bosses.Add(new Vector2(360, -100));
+                _finalBossSpawned = true;
             }
 
             // Enemy movement
@@ -123,12 +166,26 @@ namespace DemoD1
                         _bosses[i].X,
                         _bosses[i].Y + 50f * dt);
                 }
+
+                else
+                {
+                    // Boss is now active
+                    _midBossTimer += dt;
+
+                     // After 10 seconds, remove boss
+                    if (_midBossTimer > 10 && !_midBossDefeated)
+                    {
+                      _bosses.RemoveAt(i);
+                      _midBossDefeated = true;
+                      break;
+                    }
+                }
             }
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            // NOT the MonoGame default blue — proves Draw() is running
+    
             GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
@@ -167,6 +224,13 @@ namespace DemoD1
                     _pixel,
                     new Rectangle((int)b.X, (int)b.Y, 80, 80),
                     Color.Blue);
+            }
+            foreach (var b in _enemyBullets)
+            {
+             _spriteBatch.Draw(
+                _pixel,
+                new Rectangle((int)b.X, (int)b.Y, 5, 10),
+                Color.Yellow);
             }
 
             _spriteBatch.End();

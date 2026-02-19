@@ -31,3 +31,4 @@ C:\Users\logan\Downloads\487 Game\DemoD1\obj\Debug\net9.0\refint\DemoD1.dll
 C:\Users\logan\Downloads\487 Game\DemoD1\obj\Debug\net9.0\DemoD1.pdb
 C:\Users\logan\Downloads\487 Game\DemoD1\obj\Debug\net9.0\DemoD1.genruntimeconfig.cache
 C:\Users\logan\Downloads\487 Game\DemoD1\obj\Debug\net9.0\ref\DemoD1.dll
+C:\Users\logan\Downloads\487 Game\DemoD1\obj\Debug\net9.0\DemoD1.sourcelink.json
